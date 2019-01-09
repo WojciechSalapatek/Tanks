@@ -1,4 +1,7 @@
-from Objects import *
+import pygame
+import random
+import z_game_objects_dep as go
+
 
 class GameMenager():
     def __init__(self, toSpawn, groupsList, mode):
@@ -7,16 +10,16 @@ class GameMenager():
         self.spawn1 = (10, 10)
         self.spawn2 = (1019, 10)
         self.spawn3 = (515, 10)
-        self.t1 = Gui(1125, 150,  pygame.image.load('Sprites/tank.png'))
-        self.t2 = Gui(1175, 150,  pygame.image.load('Sprites/tank.png'))
-        self.t3 = Gui(1125, 225, pygame.image.load('Sprites/tank.png'))
-        self.t4 = Gui(1175, 225, pygame.image.load('Sprites/tank.png'))
-        self.t5 = Gui(1125, 300, pygame.image.load('Sprites/tank.png'))
-        self.t6 = Gui(1175, 300, pygame.image.load('Sprites/tank.png'))
-        self.t7 = Gui(1125, 375, pygame.image.load('Sprites/tank.png'))
-        self.t8 = Gui(1175, 375, pygame.image.load('Sprites/tank.png'))
-        self.t9 = Gui(1125, 450, pygame.image.load('Sprites/tank.png'))
-        self.t10 = Gui(1175, 450, pygame.image.load('Sprites/tank.png'))
+        self.t1 = go.Gui(1125, 150,  pygame.image.load('Sprites/tank.png'))
+        self.t2 = go.Gui(1175, 150,  pygame.image.load('Sprites/tank.png'))
+        self.t3 = go.Gui(1125, 225, pygame.image.load('Sprites/tank.png'))
+        self.t4 = go.Gui(1175, 225, pygame.image.load('Sprites/tank.png'))
+        self.t5 = go.Gui(1125, 300, pygame.image.load('Sprites/tank.png'))
+        self.t6 = go.Gui(1175, 300, pygame.image.load('Sprites/tank.png'))
+        self.t7 = go.Gui(1125, 375, pygame.image.load('Sprites/tank.png'))
+        self.t8 = go.Gui(1175, 375, pygame.image.load('Sprites/tank.png'))
+        self.t9 = go.Gui(1125, 450, pygame.image.load('Sprites/tank.png'))
+        self.t10 = go.Gui(1175, 450, pygame.image.load('Sprites/tank.png'))
         tlist = pygame.sprite.Group([])
         groupsList.append(tlist)
         groupsList.append(pygame.sprite.Group([]))
@@ -96,7 +99,7 @@ class GameMenager():
             spawnp = self.spawn2
         elif r == 2:
             spawnp = self.spawn3
-        groupsList[9].add(Spawner(spawnp[0], spawnp[1]))
+        groupsList[9].add(go.Spawner(spawnp[0], spawnp[1]))
         self.toSpawn -= 1
 
 # level bulder przygotowyje lvl
@@ -204,7 +207,7 @@ def buildLevel(B, W, H, mode):
     bulletGroup = pygame.sprite.Group([])
     boomGroup = pygame.sprite.Group([])
     spawnerGroup = pygame.sprite.Group([])
-    guiGroup = pygame.sprite.Group([Gui(0, 0, pygame.image.load('Sprites/frame.png'))])
+    guiGroup = pygame.sprite.Group([go.Gui(0, 0, pygame.image.load('Sprites/frame.png'))])
     groupsList = [playerGroup, neutralGroup, enemyGroup, bulletGroup, boomGroup, bushGroup, plateGroup,baseGroup, guiGroup, spawnerGroup, waterGroup]
     return groupsList, GameMenager(10, groupsList, modearg)
 
@@ -229,36 +232,36 @@ def buildMap(toParse, BLOCKSIZE, WIDTH, HEIGHT):
     baseImg = pygame.image.load('Sprites/eagle.png')
     for ch in toParse:
         if ch == "X":
-            neutralGroup.add(NormalBricksBlock(x, y, bricksImg, 1))
-            neutralGroup.add(NormalBricksBlock(x + 25, y, bricksImg, 1 ))
-            neutralGroup.add(NormalBricksBlock(x, y + 25, bricksImg, 1))
-            neutralGroup.add(NormalBricksBlock(x + 25, y + 25, bricksImg, 1))
+            neutralGroup.add(go.NormalBricksBlock(x, y, bricksImg, 1))
+            neutralGroup.add(go.NormalBricksBlock(x + 25, y, bricksImg, 1 ))
+            neutralGroup.add(go.NormalBricksBlock(x, y + 25, bricksImg, 1))
+            neutralGroup.add(go.NormalBricksBlock(x + 25, y + 25, bricksImg, 1))
         elif ch == 'U':
-            neutralGroup.add(NormalBricksBlock(x, y, bbricksImg, 300))
+            neutralGroup.add(go.NormalBricksBlock(x, y, bbricksImg, 300))
         elif ch == "S":
-            neutralGroup.add(NormalBricksBlock(x + 25, y + 25, bricksImg, 1))
-            baseGroup.add(Base(x + 50, y + 50, baseImg))
-            neutralGroup.add(NormalBricksBlock(x + 50, y + 25, bricksImg, 1))
-            neutralGroup.add(NormalBricksBlock(x + 75, y + 25, bricksImg, 1))
-            neutralGroup.add(NormalBricksBlock(x + 100, y + 25, bricksImg, 1))
-            neutralGroup.add(NormalBricksBlock(x + 25, y + 50, bricksImg, 1))
-            neutralGroup.add(NormalBricksBlock(x + 25, y + 75, bricksImg, 1))
-            neutralGroup.add(NormalBricksBlock(x + 100, y + 50, bricksImg, 1))
-            neutralGroup.add(NormalBricksBlock(x + 100, y + 75, bricksImg, 1))
+            neutralGroup.add(go.NormalBricksBlock(x + 25, y + 25, bricksImg, 1))
+            baseGroup.add(go.Base(x + 50, y + 50, baseImg))
+            neutralGroup.add(go.NormalBricksBlock(x + 50, y + 25, bricksImg, 1))
+            neutralGroup.add(go.NormalBricksBlock(x + 75, y + 25, bricksImg, 1))
+            neutralGroup.add(go.NormalBricksBlock(x + 100, y + 25, bricksImg, 1))
+            neutralGroup.add(go.NormalBricksBlock(x + 25, y + 50, bricksImg, 1))
+            neutralGroup.add(go.NormalBricksBlock(x + 25, y + 75, bricksImg, 1))
+            neutralGroup.add(go.NormalBricksBlock(x + 100, y + 50, bricksImg, 1))
+            neutralGroup.add(go.NormalBricksBlock(x + 100, y + 75, bricksImg, 1))
 
         elif ch == "B":
-            bushGroup.add(Bush(x, y, bushImg))
-            bushGroup.add(Bush(x + 25, y, bushImg))
-            bushGroup.add(Bush(x, y + 25, bushImg))
-            bushGroup.add(Bush(x + 25, y + 25, bushImg))
+            bushGroup.add(go.Bush(x, y, bushImg))
+            bushGroup.add(go.Bush(x + 25, y, bushImg))
+            bushGroup.add(go.Bush(x, y + 25, bushImg))
+            bushGroup.add(go.Bush(x + 25, y + 25, bushImg))
         elif ch == "E":
-            enemyGroup.add(Enemy(x, y, enemy1[0], enemy1[1], enemy1[2], enemy1[3], enemy1[4], enemy1[5], enemy1[6], enemy1[7]))
+            enemyGroup.add(go.Enemy(x, y, enemy1[0], enemy1[1], enemy1[2], enemy1[3], enemy1[4], enemy1[5], enemy1[6], enemy1[7]))
         elif ch == "L":
-            plateGroup.add(Plate(x, y, plateImg))
+            plateGroup.add(go.Plate(x, y, plateImg))
         elif ch == "W":
-            waterGroup.add(Water(x, y))
+            waterGroup.add(go.Water(x, y))
         elif ch == "P":
-            playerGroup.add(pygame.sprite.Group([Player(x, y, pygame.image.load('Sprites/player.png'), pygame.image.load('Sprites/player.png'), pygame.image.load('Sprites/player2.png'), 5, 5, pygame.image.load('Sprites/bullet.png'), 1)]))
+            playerGroup.add(pygame.sprite.Group([go.Player(x, y, pygame.image.load('Sprites/player.png'), pygame.image.load('Sprites/player.png'), pygame.image.load('Sprites/player2.png'), 5, 5, pygame.image.load('Sprites/bullet.png'), 1)]))
         if (x + BLOCKSIZE) >= WIDTH:
             x = 10
             y += BLOCKSIZE

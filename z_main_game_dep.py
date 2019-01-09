@@ -1,7 +1,7 @@
 import pygame, sys, shelve
+import z_game_objects_dep as go
 from pygame.locals import *
-from LevelBuilder import buildLevel
-from Objects import Menu, Button, GameObject
+import z_level_builder_dep as lb
 
 
 
@@ -59,8 +59,8 @@ class gameGui():
 BLOCKSIZE = 50
 WIDTH = 1280
 HEIGHT = 720
-PWIDTH = 1050
-PHEIGHT = 700
+FIELD_WIDTH = 1050
+FIELD_HEIGHT = 700
 PADDING = 10
 DISPLAYSURFACE = pygame.display.set_mode((WIDTH, HEIGHT))
 
@@ -73,12 +73,12 @@ class main():
         fpsClock = pygame.time.Clock()
         pygame.init()
         pygame.display.set_caption('Tanki!')
-        self.menu = Menu()
+        self.menu = go.Menu()
         self.menu.addButton(
-            Button(535, 250, pygame.image.load('Sprites/Menu/bs1.png'), pygame.image.load('Sprites/Menu/bs2.png'),
+            go.Button(535, 250, pygame.image.load('Sprites/Menu/bs1.png'), pygame.image.load('Sprites/Menu/bs2.png'),
                    pygame.image.load('Sprites/Menu/bs3.png'), "start", self.mode))
         self.menu.addButton(
-            Button(535, 350, pygame.image.load('Sprites/Menu/be1.png'), pygame.image.load('Sprites/Menu/be2.png'),
+            go.Button(535, 350, pygame.image.load('Sprites/Menu/be1.png'), pygame.image.load('Sprites/Menu/be2.png'),
                    pygame.image.load('Sprites/Menu/be3.png'), "exit", sys.exit))
 
         while inMenu:  # pętla menu
@@ -94,26 +94,26 @@ class main():
     def levels(self):
         self.menu.clearButtons()
         self.menu.addButton(
-            Button(535, 100, pygame.image.load('Sprites/Menu/bl11.png'), pygame.image.load('Sprites/Menu/bl12.png'),
+            go.Button(535, 100, pygame.image.load('Sprites/Menu/bl11.png'), pygame.image.load('Sprites/Menu/bl12.png'),
                    pygame.image.load('Sprites/Menu/bl13.png'), "start", play, 'level1', self))
         self.menu.addButton(
-            Button(535, 200, pygame.image.load('Sprites/Menu/bl21.png'), pygame.image.load('Sprites/Menu/bl22.png'),
+            go.Button(535, 200, pygame.image.load('Sprites/Menu/bl21.png'), pygame.image.load('Sprites/Menu/bl22.png'),
                    pygame.image.load('Sprites/Menu/bl23.png'), "start", play, 'level2', self))
         self.menu.addButton(
-            Button(535, 300, pygame.image.load('Sprites/Menu/bl31.png'), pygame.image.load('Sprites/Menu/bl32.png'),
+            go.Button(535, 300, pygame.image.load('Sprites/Menu/bl31.png'), pygame.image.load('Sprites/Menu/bl32.png'),
                    pygame.image.load('Sprites/Menu/bl33.png'), "start", play, 'level3', self))
         self.menu.addButton(
-            Button(535, 400, pygame.image.load('Sprites/Menu/bl41.png'), pygame.image.load('Sprites/Menu/bl42.png'),
+            go.Button(535, 400, pygame.image.load('Sprites/Menu/bl41.png'), pygame.image.load('Sprites/Menu/bl42.png'),
                    pygame.image.load('Sprites/Menu/bl43.png'), "start", play, 'level4', self))
         self.menu.addButton(
-            Button(535, 500, pygame.image.load('Sprites/Menu/bl51.png'), pygame.image.load('Sprites/Menu/bl52.png'),
+            go.Button(535, 500, pygame.image.load('Sprites/Menu/bl51.png'), pygame.image.load('Sprites/Menu/bl52.png'),
                    pygame.image.load('Sprites/Menu/bl53.png'), "start", play, 'level5', self))
 
     def mode(self):
         self.menu.clearButtons()
-        self.menu.addButton(Button(535, 250, pygame.image.load('Sprites/Menu/bl1.png'), pygame.image.load('Sprites/Menu/bl2.png'),
+        self.menu.addButton(go.Button(535, 250, pygame.image.load('Sprites/Menu/bl1.png'), pygame.image.load('Sprites/Menu/bl2.png'),
                             pygame.image.load('Sprites/Menu/bl3.png'), "levels", self.levels))
-        self.menu.addButton(Button(535, 350, pygame.image.load('Sprites/Menu/ba1.png'), pygame.image.load('Sprites/Menu/ba2.png'),
+        self.menu.addButton(go.Button(535, 350, pygame.image.load('Sprites/Menu/ba1.png'), pygame.image.load('Sprites/Menu/ba2.png'),
                             pygame.image.load('Sprites/Menu/ba3.png'), "arcade", play, 'arcade', self))
 
     def endStatus(self, mode,  score):
@@ -122,45 +122,45 @@ class main():
             self.menu.clearButtons()
             pygame.mixer.Sound.play(self.winSound)
             self.menu.addButton(
-                Button(240, 100, pygame.image.load('Sprites/Menu/pass.png'), pygame.image.load('Sprites/Menu/pass.png'),
+                go.Button(240, 100, pygame.image.load('Sprites/Menu/pass.png'), pygame.image.load('Sprites/Menu/pass.png'),
                        pygame.image.load('Sprites/Menu/pass.png'), "sign"))
             self.menu.addButton(
-                Button(535, 400, pygame.image.load('Sprites/Menu/bm1.png'), pygame.image.load('Sprites/Menu/bm2.png'),
+                go.Button(535, 400, pygame.image.load('Sprites/Menu/bm1.png'), pygame.image.load('Sprites/Menu/bm2.png'),
                        pygame.image.load('Sprites/Menu/bm3.png'), "menu", self.mode))
             self.menu.addButton(
-                Button(535, 500, pygame.image.load('Sprites/Menu/be1.png'), pygame.image.load('Sprites/Menu/be2.png'),
+                go.Button(535, 500, pygame.image.load('Sprites/Menu/be1.png'), pygame.image.load('Sprites/Menu/be2.png'),
                        pygame.image.load('Sprites/Menu/be3.png'), "exit", sys.exit))
 
         elif mode == 'levels' and score == -1:
             self.menu.clearButtons()
             pygame.mixer.Sound.play(self.loseSound)
             self.menu.addButton(
-                Button(315, 50, pygame.image.load('Sprites/Menu/def1.png'), pygame.image.load('Sprites/Menu/def1.png'),
+                go.Button(315, 50, pygame.image.load('Sprites/Menu/def1.png'), pygame.image.load('Sprites/Menu/def1.png'),
                        pygame.image.load('Sprites/Menu/def1.png'), "sign"))
             self.menu.addButton(
-                Button(535, 450, pygame.image.load('Sprites/Menu/bm1.png'), pygame.image.load('Sprites/Menu/bm2.png'),
+                go.Button(535, 450, pygame.image.load('Sprites/Menu/bm1.png'), pygame.image.load('Sprites/Menu/bm2.png'),
                        pygame.image.load('Sprites/Menu/bm3.png'), "menu", self.mode))
             self.menu.addButton(
-                Button(535, 550, pygame.image.load('Sprites/Menu/be1.png'), pygame.image.load('Sprites/Menu/be2.png'),
+                go.Button(535, 550, pygame.image.load('Sprites/Menu/be1.png'), pygame.image.load('Sprites/Menu/be2.png'),
                        pygame.image.load('Sprites/Menu/be3.png'), "exit", sys.exit))
 
         elif mode == 'arcade':
             self.menu.clearButtons()
             pygame.mixer.Sound.play(self.winSound)
             self.menu.addButton(
-                Button(335, 50, pygame.image.load('Sprites/Menu/def1.png'), pygame.image.load('Sprites/Menu/def1.png'),
+                go.Button(335, 50, pygame.image.load('Sprites/Menu/def1.png'), pygame.image.load('Sprites/Menu/def1.png'),
                        pygame.image.load('Sprites/Menu/def1.png'), "sign"))
             self.menu.addButton(
-                Button(460, 280, pygame.image.load('Sprites/Menu/sc.png'), pygame.image.load('Sprites/Menu/sc.png'),
+                go.Button(460, 280, pygame.image.load('Sprites/Menu/sc.png'), pygame.image.load('Sprites/Menu/sc.png'),
                        pygame.image.load('Sprites/Menu/sc.png'), "sign"))
             self.menu.addButton(
-                Button(460, 350, pygame.image.load('Sprites/Menu/hsc.png'), pygame.image.load('Sprites/Menu/hsc.png'),
+                go.Button(460, 350, pygame.image.load('Sprites/Menu/hsc.png'), pygame.image.load('Sprites/Menu/hsc.png'),
                        pygame.image.load('Sprites/Menu/hsc.png'), "sign"))
             self.menu.addButton(
-                Button(535, 450, pygame.image.load('Sprites/Menu/bm1.png'), pygame.image.load('Sprites/Menu/bm2.png'),
+                go.Button(535, 450, pygame.image.load('Sprites/Menu/bm1.png'), pygame.image.load('Sprites/Menu/bm2.png'),
                        pygame.image.load('Sprites/Menu/bm3.png'), "menu", self.mode))
             self.menu.addButton(
-                Button(535, 550, pygame.image.load('Sprites/Menu/be1.png'), pygame.image.load('Sprites/Menu/be2.png'),
+                go.Button(535, 550, pygame.image.load('Sprites/Menu/be1.png'), pygame.image.load('Sprites/Menu/be2.png'),
                        pygame.image.load('Sprites/Menu/be3.png'), "exit", sys.exit))
             self.myfont = pygame.font.SysFont('Comic Sans MS', 67)
             d = shelve.open('data')
@@ -171,9 +171,9 @@ class main():
             scoresurf = self.myfont.render(str(score), False, (255, 102, 0))
             hiscoresurf = self.myfont.render(str(hiscore), False, (255, 102, 0))
             self.menu.addButton(
-                Button(670, 280, scoresurf, scoresurf, scoresurf, "Sprite"))
+                go.Button(670, 280, scoresurf, scoresurf, scoresurf, "Sprite"))
             self.menu.addButton(
-                Button(720, 360, hiscoresurf, hiscoresurf, hiscoresurf, "Sprite"))
+                go.Button(720, 360, hiscoresurf, hiscoresurf, hiscoresurf, "Sprite"))
 
 
 def play(mode, main): # pętla gry
@@ -182,7 +182,7 @@ def play(mode, main): # pętla gry
     pygame.init()
     fpsClock = pygame.time.Clock()
     pygame.display.set_caption('Tanki!')
-    glist , gmenager = buildLevel(BLOCKSIZE, PWIDTH + PADDING, HEIGHT, mode)
+    glist , gmenager = lb.buildLevel(BLOCKSIZE, FIELD_WIDTH + PADDING, HEIGHT, mode)
     gameHandler = GameHandler(DISPLAYSURFACE, None, gmenager, glist)
     while playing == 0:  # główna pętla
         DISPLAYSURFACE.fill((0, 0, 0))
@@ -195,12 +195,12 @@ def play(mode, main): # pętla gry
                 sys.exit()
         playing = gmenager.status()
         pygame.display.update()
-        print(fpsClock.get_fps())
         fpsClock.tick(FPS)
     gmenager.gameEnd(main, playing)
 
 
-pygame.mixer.pre_init(44100, -16, 1, 1024)
-pygame.mixer.init()
-pygame.mixer.music.load('Music/button1.wav')
-gra = main()
+if __name__ == "__main__":
+    pygame.mixer.pre_init(44100, -16, 1, 1024)
+    pygame.mixer.init()
+    pygame.mixer.music.load('Music/button1.wav')
+    gra = main()

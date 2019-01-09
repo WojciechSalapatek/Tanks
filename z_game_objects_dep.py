@@ -1,8 +1,9 @@
 import pygame, sys, os
-from pygame.locals import *
+import z_main_game_dep as mg
 import random
 
 
+# Base
 class GameObject(pygame.sprite.Sprite):
     def __init__(self, x, y, image, hp):
         super().__init__()
@@ -11,21 +12,25 @@ class GameObject(pygame.sprite.Sprite):
         self.rect.x = x
         self.rect.y = y
         self.hp = hp
-        self.hasShield = False
+        self.has_shield = False
 
-    # Sprawdza czy obiekt nie jest poza mapa
-    def hasGoodPos(self):
-        if self.rect.x < 10 or self.rect.y <  10 or self.rect.x > 1050 + 9 -self.image.get_width() or self.rect.y > 720-10 -self.image.get_height():
+    # Checks if object is in valid position
+    def has_good_position(self):
+        offset = 10
+        if self.rect.x < offset or self.rect.x + self.image.get_width() > mg.FIELD_WIDTH + offset:
             return False
-        else:
-            return True
+        if self.rect.y < offset or self.rect.y + self.image.get_height() > mg.FIELD_HEIGHT + offset:
+            return False
 
-    def decreaseHp(self, amount):
-        if not self.hasShield:
+        return True
+
+    def decrease_hp(self, amount):
+        if not self.has_shield:
             self.hp -= amount
         return self.hp
 
-# klasa po której dziedzicą wszystkie tanki
+
+# Tank base class
 class Tank(GameObject):
     bulletSpeed = 20*(3/2)
 
@@ -63,7 +68,7 @@ class Tank(GameObject):
                     groupsList[i].remove(self)
                     isIn = True
                 tick = 0
-                if pygame.sprite.spritecollide(self, groupsList[i], False) or not self.hasGoodPos():
+                if pygame.sprite.spritecollide(self, groupsList[i], False) or not self.has_good_position():
                     self.rect.x -= amount
                     tick += 1
                 if isIn:
@@ -88,7 +93,7 @@ class Tank(GameObject):
                     groupsList[i].remove(self)
                     isIn = True
                 tick = 0
-                if pygame.sprite.spritecollide(self, groupsList[i], False) or not self.hasGoodPos():
+                if pygame.sprite.spritecollide(self, groupsList[i], False) or not self.has_good_position():
                     self.rect.y -= amount
                     tick += 1
                 if isIn:
@@ -183,10 +188,10 @@ class Player(Tank):
             self.delay -= 1.5*(3/2)
         self.delay -= 1*(3/2)
 
-        if self.hasShield:
+        if self.has_shield:
             self.shieldTimer -= 1
             if self.shieldTimer <= 0:
-                self.hasShield = False
+                self.has_shield = False
             else:
                 self.updateShield(displaysurface)
 
@@ -296,7 +301,7 @@ class Bullet(GameObject):
         self.owner = owner
 
     def update(self, groupsList):
-        if not self.hasGoodPos():
+        if not self.has_good_position():
             groupsList[3].remove(self)
         for i in range(0, 3):
             if self.owner in groupsList[i]:
@@ -336,7 +341,7 @@ class Boom (GameObject):
                             pygame.mixer.Sound.play(self.hit)
                         else:
                             pygame.mixer.Sound.play(self.hit2)
-                        if gameObject.decreaseHp(1) <= 0:
+                        if gameObject.decrease_hp(1) <= 0:
                             if i== 2:
                                 groupsList[4].add(BigBoom(self.rect.x, self.rect.y, pygame.image.load('Sprites/boom11.png')))
                             if i != 0:
@@ -348,7 +353,7 @@ class Boom (GameObject):
                             pygame.mixer.Sound.play(self.hit)
                         else:
                             pygame.mixer.Sound.play(self.hit2)
-                        if gameObject.decreaseHp(1) <= 0:
+                        if gameObject.decrease_hp(1) <= 0:
                             if i ==2:
                                 groupsList[4].add(BigBoom(self.rect.x -23, self.rect.y -23, pygame.image.load('Sprites/boom11.png')))
                             if i != 0:
