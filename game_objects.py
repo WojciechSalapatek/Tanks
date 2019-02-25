@@ -1,11 +1,15 @@
 import pygame
-import z_main_game_dep as mg
+import main_game as mg
 import random
 import math
 import loader
-
+import copy
+import sys
+import shelve
 loader.init_game_images()
+loader.init_menu_images()
 gi = loader.game_images
+mi = loader.menu_images
 
 
 # Base
@@ -179,7 +183,7 @@ class Player(Tank):
             self.shoot(handler, delta)
 
         if self.has_shield:
-            self.shield_timer -= 1
+            self.shield_timer -= delta
             if self.shield_timer <= 0:
                 self.has_shield = False
             else:
@@ -191,15 +195,14 @@ class Player(Tank):
             pygame.mixer.Sound.play(self.shoot_sound)
 
     def update_shield(self, displaysurface):
-        pass
-        # sh = GameObject(self.rect.x - 7, self.rect.y - 7, pygame.image.load('Sprites/shiel.png'), 1)
-        # shg = pygame.sprite.Group([sh])
-        # sh.rect.x = self.rect.x - 7
-        # sh.rect.y = self.rect.y - 7
-        # shg.draw(displaysurface)
+        sh = GameObject(self.rect.x - 7, self.rect.y - 7, gi["shiel"], 1)
+        shg = pygame.sprite.Group([sh])
+        sh.rect.x = self.rect.x - 7
+        sh.rect.y = self.rect.y - 7
+        shg.draw(displaysurface)
 
     def give_shield(self, groups_list):
-        self.shield_timer = 200
+        self.shield_timer = 6
         self.has_shield = True
 
 
@@ -458,9 +461,9 @@ class Water(GameObject):
         self.image2 = gi['water2']
 
     def update(self, delta, handler):
-        if self.timer < 30:
+        if self.timer < 0.4:
             self.image = self.image1
-        elif self.timer < 60:
+        elif self.timer < 0.8:
             self.image = self.image2
         else:
             self.timer = 0
@@ -566,3 +569,146 @@ class Spawner(GameObject):
             handler.groups_list[9].add(self)
         self.tick += delta
         self.timer += delta
+
+
+class Frame(GameObject):
+    def __init__(self):
+        super().__init__(0, 0, gi["frame"], 1)
+        self.img = gi["frame"]
+
+    def update(self, delta, handler):
+        font = pygame.font.SysFont("arial", 35)
+        self.image = copy.copy(self.img)
+        self.image.blit(font.render("HP: {}".format(handler.groups_list[0].sprites()[0].hp), 15, (0, 0, 0)), (1125, 50))
+        handler.groups_list[8] = pygame.sprite.Group([self])
+        y = 40
+        for i in range(handler.game_manager.to_spawn):
+            x = 1100 if i % 2 == 0 else 1200
+            y += 60 if i % 2 == 0 else 0
+            handler.groups_list[8].add(GameObject(x, y, gi["tank"], 1))
+
+
+class Button(GameObject):
+    def __init__(self, x, y, image1, image2, image3, label, *args, action=None):
+        super().__init__(x, y, image1, None)
+        self.image1 = image1
+        self.image2 = image2
+        self.image3 = image3
+        self.label = label
+        self.action = action
+        self.clicked = False
+        self.play = True
+        self.sound1 = pygame.mixer.Sound('Music/button1.wav')
+        self.args = args
+
+    def update(self):
+        mouse = pygame.mouse.get_pos()
+        if (self.rect.x < mouse[0] <= self.rect.x + self.image.get_width()) and (self.rect.y < mouse[1] <= self.rect.y + self.image.get_height()):
+            self.image = self.image2
+            if self.play:
+                pygame.mixer.Sound.play(self.sound1)
+                self.play = False
+            if pygame.mouse.get_pressed()[0] == 1:
+                self.image = self.image3
+                self.clicked = True
+            elif pygame.mouse.get_pressed()[0] != 1:
+                if self.clicked:
+                    if self.action is not None:
+                        self.action(*self.args)
+        else:
+            self.image = self.image1
+            self.play = True
+
+
+class Menu:
+    def __init__(self, displaysurface):
+        self.buttons = pygame.sprite.Group(
+            [Button(535, 250, mi["bs1"], mi["bs2"], mi["bs3"], "start", action=self.choose_mode),
+             Button(535, 350, mi["be1"], mi["be2"], mi["be3"], "exit", action=sys.exit)])
+        self.background = pygame.sprite.Group(GameObject(0, 0, mi["background"], 1))
+        self.displaysurface = displaysurface
+        self.level = None
+        self.mode = None
+        self.in_menu = True
+        self.win_sound = pygame.mixer.Sound('Music/win.wav')
+        self.lose_sound = pygame.mixer.Sound('Music/lose.wav')
+
+    def update(self):
+        self.buttons.update()
+        self.background.draw(self.displaysurface)
+        self.buttons.draw(self.displaysurface)
+
+    def clear_buttons(self):
+        self.buttons = pygame.sprite.Sprite([])
+
+    def choose_mode(self):
+        self.clear_buttons()
+        self.buttons = pygame.sprite.Group([
+            Button(535, 250, mi["bl1"], mi["bl2"], mi["bl3"], "levels", action=self.levels),
+            Button(535, 350, mi["ba1"], mi["ba2"], mi["ba3"], "arcade", "level6", 0, action=self.quit)])
+
+    def levels(self):
+        self.clear_buttons()
+        self.buttons = pygame.sprite.Group([
+            Button(535, 125, mi["bl11"], mi["bl12"], mi["bl13"], "level1", "level1", 1, action=self.quit),
+            Button(535, 225, mi["bl21"], mi["bl22"], mi["bl23"], "level2", "level2", 1, action=self.quit),
+            Button(535, 325, mi["bl31"], mi["bl32"], mi["bl33"], "level3", "level3", 1, action=self.quit),
+            Button(535, 425, mi["bl41"], mi["bl42"], mi["bl43"], "level4", "level4", 1, action=self.quit),
+            Button(535, 525, mi["bl51"], mi["bl52"], mi["bl53"], "level5", "level5", 1, action=self.quit)])
+
+    def quit(self, level, mode):
+        self.in_menu = False
+        self.level = level
+        self.mode = mode
+
+    def end_menu(self, score):
+        pygame.mixer.music.stop()
+        if score == -1:
+            self.clear_buttons()
+            pygame.mixer.Sound.play(self.win_sound)
+            self.buttons = pygame.sprite.Group([
+                Button(535, 400, mi["bm1"], mi["bm2"], mi["bm3"], "menu", action=self.choose_mode),
+                Button(535, 500, mi["be1"], mi["be2"], mi["be3"], "menu", action=sys.exit),
+                GameObject(240, 100, mi["pass"], 1)
+            ])
+        elif score == 0:
+            self.clear_buttons()
+            pygame.mixer.Sound.play(self.lose_sound)
+            self.buttons = pygame.sprite.Group([
+                Button(535, 400, mi["bm1"], mi["bm2"], mi["bm3"], "menu", action=self.choose_mode),
+                Button(535, 500, mi["be1"], mi["be2"], mi["be3"], "menu", action=sys.exit),
+                GameObject(315, 50, mi["def"], 1)
+            ])
+
+        elif score > 0:
+            self.clear_buttons()
+            pygame.mixer.Sound.play(self.lose_sound)
+            font = pygame.font.SysFont('Comic Sans MS', 67)
+            d = shelve.open('data')
+            hsc = d['score']
+            if score > hsc:
+                d['score'] = score
+                hsc = score
+            sc_surface = font.render(str(score), False, (255, 102, 0))
+            hsc_surface = font.render(str(hsc), False, (255, 102, 0))
+            self.buttons = pygame.sprite.Group([
+                Button(535, 500, mi["bm1"], mi["bm2"], mi["bm3"], "menu", action=self.choose_mode),
+                Button(535, 600, mi["be1"], mi["be2"], mi["be3"], "menu", action=sys.exit),
+                GameObject(315, 50, mi["def"], 1),
+                GameObject(460, 280, mi["score"], 1),
+                GameObject(460, 350, mi["hi_score"], 1),
+                GameObject(670, 280, sc_surface, 1),
+                GameObject(720, 360, hsc_surface, 1),
+            ])
+
+
+
+
+
+
+
+
+
+
+
+

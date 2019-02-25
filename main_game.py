@@ -2,16 +2,17 @@ import pygame, os
 import game_objects as go
 import random
 import level_builder as lb
-
+import pygame.locals
 
 class GameManager:
-    def __init__(self, to_spawn, mode,):
+    def __init__(self, to_spawn, mode):
         self.mode = mode
         self.to_spawn = to_spawn
         self.spawn1 = (10, 10)
         self.spawn2 = (1019, 10)
         self.spawn3 = (515, 10)
         self.status = 1
+        self.score = 0
 
     def spawn(self, groups_list):
         spawn_point = None
@@ -28,8 +29,13 @@ class GameManager:
     def update(self, groups_list):
         if len(groups_list[2]) + len(groups_list[9]) < 3 and self.to_spawn > 0:
             self.spawn(groups_list)
-            self.to_spawn -= 1
-        self.status = 1 if groups_list[0].sprites()[0].hp > 0 else 0
+            if self.mode:
+                self.to_spawn -= 1
+            else:
+                self.score += 100
+        self.status = 1 if groups_list[0].sprites()[0].hp > 0 else (0 if self.mode else self.score)
+        if self.mode and not self.to_spawn and len(groups_list[2]) + len(groups_list[9]) == 0:
+            self.status = -1
 
 
 class GameHandler:
@@ -71,19 +77,34 @@ PADDING = 10
 DISPLAYSURFACE = pygame.display.set_mode((WIDTH, HEIGHT))
 
 
-def main():
-    play()
+def main(score=None):
+    menu = go.Menu(DISPLAYSURFACE)
+    if score is not None:
+        menu.end_menu(score)
+    while menu.in_menu:
+        for event in pygame.event.get():
+            if event.type == pygame.locals.QUIT:
+                pygame.quit()
+                os.sys.exit()
+        menu.update()
+        pygame.display.update()
+    status = play(menu.level, menu.mode)
+    main(score=status)
 
 
-def play():
+def play(level, mode):
     playing = 1
     pygame.init()
     clock = pygame.time.Clock()
     pygame.display.set_caption('Tanki!')
-    game_manager = GameManager(10, 1)
-    game_handler = GameHandler(DISPLAYSURFACE, game_manager, lb.build_level('levels/level1.lvl'))
+    game_manager = GameManager(10, mode)
+    game_handler = GameHandler(DISPLAYSURFACE, game_manager, lb.build_level('levels/{}.lvl'.format(level)))
     last_time = 0
+    passed = 0
+    frames = 0
+
     while playing == 1:
+        frames += 1
         DISPLAYSURFACE.fill((0, 0, 0))
         game_handler.render(DISPLAYSURFACE)
         t = pygame.time.get_ticks()
@@ -97,11 +118,16 @@ def play():
         playing = game_manager.status
         pygame.display.update()
         clock.tick(FPS)
-        print(clock.get_fps())
+        passed += delta
+        if passed > 1:
+            passed = 0
+            print(frames)
+            frames = 0
+    return playing
 
 
 if __name__ == "__main__":
-    pygame.mixer.pre_init(44100, -16, 1, 1024)
+    pygame.mixer.pre_init(34100, -16, 1, 1024)
     pygame.mixer.init()
     pygame.mixer.music.load('Music/button1.wav')
     main()

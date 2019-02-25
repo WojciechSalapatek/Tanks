@@ -57,5 +57,6 @@ def build_level(level_path):
             # groups: 0-player 1-neutral, 2-enemy, 3-bullets, 4-boom 5-bushes , 6-plates, 7-base,
             # 8-gui, 9-spawner 10 - water 12-items
     return [player_group, neutral_group, enemy_group, pygame.sprite.Group([]),
-            pygame.sprite.Group([]), bush_group, plate_group, base_group, pygame.sprite.Group([]),
-            pygame.sprite.Group([]), water_group, pygame.sprite.Group([]), pygame.sprite.Group([]) ]
+            pygame.sprite.Group([]), bush_group, plate_group, base_group, pygame.sprite.Group([go.Frame()]),
+            pygame.sprite.Group([]), water_group, pygame.sprite.Group([]), pygame.sprite.Group([])]
+
